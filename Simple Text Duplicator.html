@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Text Duplicator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+    }
+
+    textarea {
+      width: 95%;
+      height: 150px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: vertical;
+    }
+
+    select, input[type="number"], button {
+      padding: 8px 12px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 95%; 
+      box-sizing: border-box; 
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #output {
+      width: 95%;
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      word-break: break-all; 
+    }
+  </style>
+</head>
+<body>
+  <h1>Text Duplicator</h1>
+  <textarea id="textInput" placeholder="Enter your text here"></textarea>
+
+  <div>
+    <label for="duplicateCount">Number of Duplicates:</label>
+    <input type="number" id="duplicateCount" value="1" min="1">
+  </div>
+
+  <select id="modeSelect">
+    <option value="normal">Normal Duplicate (by lines)</option>
+    <option value="numbered">Numbered Duplicate</option>
+  </select>
+
+  <button onclick="duplicateText()">Duplicate</button>
+  <button onclick="copyText()">Copy</button>
+
+  <div id="output"></div>
+
+  <script>
+    function duplicateText() {
+      const text = document.getElementById("textInput").value;
+      const mode = document.getElementById("modeSelect").value;
+      const count = parseInt(document.getElementById("duplicateCount").value);
+      let output = "";
+
+      if (mode === "normal") {
+        const lines = text.split('\n');
+        for (let i = 0; i < count; i++) {
+          output += text + "\n";
+        }
+      } else if (mode === "numbered") {
+        let lineNumber = 1;
+        for (let i = 0; i < count; i++) {
+          const lines = text.split('\n');
+          for (let j = 0; j < lines.length; j++) {
+            output += lineNumber + ". " + lines[j] + "\n";
+            lineNumber++;
+          }
+        }
+      }
+
+      document.getElementById("output").innerText = output;
+    }
+
+    function copyText() {
+      const outputDiv = document.getElementById("output");
+      const outputText = outputDiv.innerText;
+
+      // Create a temporary textarea element
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = outputText;
+      document.body.appendChild(tempTextArea);
+
+      
+      tempTextArea.select();
+      tempTextArea.setSelectionRange(0, 99999); 
+
+      document.execCommand("copy");
+
+      
+      document.body.removeChild(tempTextArea);
+
+      alert("Text copied to clipboard!");
+    }
+  </script>
+</body>
+</html>

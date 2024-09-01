@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Word Analyzer</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: #333;
+            color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            position: relative;
+            touch-action: none;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            position: relative;
+            touch-action: none;
+        }
+
+        #results {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            position: relative;
+            touch-action: none;
+        }
+
+        #results p {
+            margin-bottom: 10px;
+        }
+
+        #mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="header">Simple Word Analyzer</h1>
+    <textarea id="text-input" placeholder="Enter your text here..."></textarea>
+
+    <div id="results">
+        <h2>Results</h2>
+        <p>Word Count: <span id="word-count">0</span></p>
+        <p>Character Count: <span id="character-count">0</span></p>
+        <p>Sentence Count: <span id="sentence-count">0</span></p>
+    </div>
+
+    <span id="mode-toggle">☀️</span> 
+
+    <script>
+        const textInput = document.getElementById("text-input");
+        const wordCount = document.getElementById("word-count");
+        const characterCount = document.getElementById("character-count");
+        const sentenceCount = document.getElementById("sentence-count");
+        const modeToggle = document.getElementById("mode-toggle");
+        const resultsDiv = document.getElementById("results");
+        const header = document.getElementById("header");
+        let darkMode = false;
+
+        function analyze() {
+            const text = textInput.value;
+            const words = text.split(/\s+/).filter(word => word.length > 0);
+            const characters = text.length;
+            const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+
+            wordCount.textContent = words.length;
+            characterCount.textContent = characters;
+            sentenceCount.textContent = sentences.length;
+
+            localStorage.setItem('savedText', text);
+        }
+
+        textInput.addEventListener('input', analyze);
+
+        modeToggle.addEventListener('click', () => {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode');
+            modeToggle.textContent = darkMode ? '☼️' : '☀️';
+            localStorage.setItem('darkMode', darkMode);
+        });
+
+        function makeDraggable(element) {
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            element.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - element.offsetLeft;
+                offsetY = e.clientY - element.offsetTop;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    element.style.left = (e.clientX - offsetX) + 'px';
+                    element.style.top = (e.clientY - offsetY) + 'px';
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            
+            element.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                offsetX = e.touches[0].clientX - element.offsetLeft;
+                offsetY = e.touches[0].clientY - element.offsetTop;
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging) {
+                    element.style.left = (e.touches[0].clientX - offsetX) + 'px';
+                    element.style.top = (e.touches[0].clientY - offsetY) + 'px';
+                }
+            });
+
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+        }
+
+        makeDraggable(resultsDiv);
+        makeDraggable(textInput);
+        makeDraggable(header);
+        makeDraggable(modeToggle);
+
+        const savedText = localStorage.getItem('savedText');
+        if (savedText) {
+            textInput.value = savedText;
+            analyze();
+        }
+
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'true') {
+            darkMode = true;
+            document.body.classList.add('dark-mode');
+            modeToggle.textContent = '☼️';
+        }
+    </script>
+</body>
+</html>

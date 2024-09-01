@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Unit Converter</title>
+<style>
+body {
+  font-family: sans-serif;
+  background-color: #222;
+  color: #eee;
+}
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+}
+.converter {
+  background-color: #333;
+  border: 1px solid #555;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  width: 90%;
+  max-width: 500px;
+  position: relative; 
+}
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ddd;
+}
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+input[type="number"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background-color: #444;
+  color: #eee;
+  font-size: 16px;
+}
+select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background-color: #444;
+  color: #eee;
+  font-size: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+select::-ms-expand {
+  display: none;
+}
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+}
+button:hover {
+  background-color: #0056b3;
+}
+#result {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #0f0;
+}
+.search-container {
+  margin-bottom: 10px;
+  display: none; 
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  z-index: 10; 
+  background-color: #333;
+  border: 1px solid #555;
+  border-radius: 5px;
+  padding: 10px;
+}
+.search-container input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background-color: #444;
+  color: #eee;
+  font-size: 14px;
+}
+.supported {
+  background-color: #28a745; 
+}
+@media (max-width: 600px) {
+  .converter {
+    width: 100%;
+  }
+  .search-container {
+    left: 0;
+    width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="converter">
+    <h2>Unit Converter</h2>
+
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Search units...">
+    </div>
+
+    <label for="input">Value:</label>
+    <input type="number" id="input" value="1">
+    <label for="from">From:</label>
+    <select id="from" onfocus="showSearch()" onchange="filterToOptions()">
+      <optgroup label="Length">
+        <option value="meter">Meter (m)</option>
+        <option value="kilometer">Kilometer (km)</option>
+        <option value="centimeter">Centimeter (cm)</option>
+        <option value="millimeter">Millimeter (mm)</option>
+        <option value="mile">Mile (mi)</option>
+        <option value="yard">Yard (yd)</option>
+        <option value="foot">Foot (ft)</option>
+        <option value="inch">Inch (in)</option>
+      </optgroup>
+      <optgroup label="Temperature">
+        <option value="celsius">Celsius (°C)</option>
+        <option value="fahrenheit">Fahrenheit (°F)</option>
+        <option value="kelvin">Kelvin (K)</option>
+      </optgroup>
+      <optgroup label="Weight">
+        <option value="kilogram">Kilogram (kg)</option>
+        <option value="gram">Gram (g)</option>
+        <option value="pound">Pound (lb)</option>
+        <option value="ounce">Ounce (oz)</option>
+      </optgroup>
+      <optgroup label="Volume">
+        <option value="liter">Liter (L)</option>
+        <option value="milliliter">Milliliter (mL)</option>
+        <option value="gallon">Gallon (gal)</option>
+        <option value="quart">Quart (qt)</option>
+        <option value="pint">Pint (pt)</option>
+        <option value="cup">Cup (cup)</option>
+        <option value="fluid-ounce">Fluid Ounce (fl oz)</option>
+      </optgroup>
+      <optgroup label="Time">
+        <option value="second">Second (s)</option>
+        <option value="minute">Minute (min)</option>
+        <option value="hour">Hour (h)</option>
+        <option value="day">Day (d)</option>
+        <option value="week">Week (wk)</option>
+        <option value="year">Year (yr)</option>
+      </optgroup>
+      <optgroup label="Speed">
+        <option value="metersPerSecond">Meters per Second (m/s)</option>
+        <option value="kilometersPerHour">Kilometers per Hour (km/h)</option>
+        <option value="milesPerHour">Miles per Hour (mph)</option>
+      </optgroup>
+      <optgroup label="Area">
+        <option value="squareMeter">Square Meter (m²)</option>
+        <option value="squareKilometer">Square Kilometer (km²)</option>
+        <option value="squareCentimeter">Square Centimeter (cm²)</option>
+        <option value="squareMillimeter">Square Millimeter (mm²)</option>
+        <option value="squareInch">Square Inch (in²)</option>
+        <option value="squareFoot">Square Foot (ft²)</option>
+        <option value="squareYard">Square Yard (yd²)</option>
+        <option value="acre">Acre (acre)</option>
+        <option value="hectare">Hectare (ha)</option>
+      </optgroup>
+      <optgroup label="Data">
+        <option value="byte">Byte (B)</option>
+        <option value="kilobyte">Kilobyte (KB)</option>
+        <option value="megabyte">Megabyte (MB)</option>
+        <option value="gigabyte">Gigabyte (GB)</option>
+        <option value="terabyte">Terabyte (TB)</option>
+        <option value="petabyte">Petabyte (PB)</option>
+      </optgroup>
+      <optgroup label="Energy">
+        <option value="joule">Joule (J)</option>
+        <option value="calorie">Calorie (cal)</option>
+        <option value="kilowattHour">Kilowatt-hour (kWh)</option>
+      </optgroup>
+      <optgroup label="Pressure">
+        <option value="pascal">Pascal (Pa)</option>
+        <option value="bar">Bar (bar)</option>
+        <option value="atmosphere">Atmosphere (atm)</option>
+        <option value="psi">Pound per Square Inch (psi)</option>
+      </optgroup>
+      <optgroup label="Power">
+        <option value="watt">Watt (W)</option>
+        <option value="kilowatt">Kilowatt (kW)</option>
+        <option value="horsepower">Horsepower (hp)</option>
+      </optgroup>
+    </select>
+    <label for="to">To:</label>
+    <select id="to" onfocus="showSearch()">
+      <optgroup label="Length">
+        <option value="meter">Meter (m)</option>
+        <option value="kilometer">Kilometer (km)</option>
+        <option value="centimeter">Centimeter (cm)</option>
+        <option value="millimeter">Millimeter (mm)</option>
+        <option value="mile">Mile (mi)</option>
+        <option value="yard">Yard (yd)</option>
+        <option value="foot">Foot (ft)</option>
+        <option value="inch">Inch (in)</option>
+      </optgroup>
+      <optgroup label="Temperature">
+        <option value="celsius">Celsius (°C)</option>
+        <option value="fahrenheit">Fahrenheit (°F)</option>
+        <option value="kelvin">Kelvin (K)</option>
+      </optgroup>
+      <optgroup label="Weight">
+        <option value="kilogram">Kilogram (kg)</option>
+        <option value="gram">Gram (g)</option>
+        <option value="pound">Pound (lb)</option>
+        <option value="ounce">Ounce (oz)</option>
+      </optgroup>
+      <optgroup label="Volume">
+        <option value="liter">Liter (L)</option>
+        <option value="milliliter">Milliliter (mL)</option>
+        <option value="gallon">Gallon (gal)</option>
+        <option value="quart">Quart (qt)</option>
+        <option value="pint">Pint (pt)</option>
+        <option value="cup">Cup (cup)</option>
+        <option value="fluid-ounce">Fluid Ounce (fl oz)</option>
+      </optgroup>
+      <optgroup label="Time">
+        <option value="second">Second (s)</option>
+        <option value="minute">Minute (min)</option>
+        <option value="hour">Hour (h)</option>
+        <option value="day">Day (d)</option>
+        <option value="week">Week (wk)</option>
+        <option value="year">Year (yr)</option>
+      </optgroup>
+      <optgroup label="Speed">
+        <option value="metersPerSecond">Meters per Second (m/s)</option>
+        <option value="kilometersPerHour">Kilometers per Hour (km/h)</option>
+        <option value="milesPerHour">Miles per Hour (mph)</option>
+      </optgroup>
+      <optgroup label="Area">
+        <option value="squareMeter">Square Meter (m²)</option>
+        <option value="squareKilometer">Square Kilometer (km²)</option>
+        <option value="squareCentimeter">Square Centimeter (cm²)</option>
+        <option value="squareMillimeter">Square Millimeter (mm²)</option>
+        <option value="squareInch">Square Inch (in²)</option>
+        <option value="squareFoot">Square Foot (ft²)</option>
+        <option value="squareYard">Square Yard (yd²)</option>
+        <option value="acre">Acre (acre)</option>
+        <option value="hectare">Hectare (ha)</option>
+      </optgroup>
+      <optgroup label="Data">
+        <option value="byte">Byte (B)</option>
+        <option value="kilobyte">Kilobyte (KB)</option>
+        <option value="megabyte">Megabyte (MB)</option>
+        <option value="gigabyte">Gigabyte (GB)</option>
+        <option value="terabyte">Terabyte (TB)</option>
+        <option value="petabyte">Petabyte (PB)</option>
+      </optgroup>
+      <optgroup label="Energy">
+        <option value="joule">Joule (J)</option>
+        <option value="calorie">Calorie (cal)</option>
+        <option value="kilowattHour">Kilowatt-hour (kWh)</option>
+      </optgroup>
+      <optgroup label="Pressure">
+        <option value="pascal">Pascal (Pa)</option>
+        <option value="bar">Bar (bar)</option>
+        <option value="atmosphere">Atmosphere (atm)</option>
+        <option value="psi">Pound per Square Inch (psi)</option>
+      </optgroup>
+      <optgroup label="Power">
+        <option value="watt">Watt (W)</option>
+        <option value="kilowatt">Kilowatt (kW)</option>
+        <option value="horsepower">Horsepower (hp)</option>
+      </optgroup>
+    </select>
+    <button onclick="convert()">Convert</button>
+    <div id="result"></div>
+  </div>
+</div>
+<script>
+function convert() {
+  var input = document.getElementById("input").value;
+  var from = document.getElementById("from").value;
+  var to = document.getElementById("to").value;
+  var result = document.getElementById("result");
+
+  var convertedValue;
+  var unitAbbreviation;
+
+  // Length conversions
+  if (from === "meter" && to === "kilometer") {
+    convertedValue = input / 1000;
+    unitAbbreviation = "km";
+  } else if (from === "kilometer" && to === "meter") {
+    convertedValue = input * 1000;
+    unitAbbreviation = "m";
+  } else if (from === "meter" && to === "centimeter") {
+    convertedValue = input * 100;
+    unitAbbreviation = "cm";
+  } else if (from === "centimeter" && to === "meter") {
+    convertedValue = input / 100;
+    unitAbbreviation = "m";
+  } else if (from === "meter" && to === "millimeter") {
+    convertedValue = input * 1000;
+    unitAbbreviation = "mm";
+  } else if (from === "millimeter" && to === "meter") {
+    convertedValue = input / 1000;
+    unitAbbreviation = "m";
+  } else if (from === "meter" && to === "mile") {
+    convertedValue = input * 0.000621371;
+    unitAbbreviation = "mi";
+  } else if (from === "mile" && to === "meter") {
+    convertedValue = input * 1609.34;
+    unitAbbreviation = "m";
+  } else if (from === "meter" && to === "yard") {
+    convertedValue = input * 1.09361;
+    unitAbbreviation = "yd";
+  } else if (from === "yard" && to === "meter") {
+    convertedValue = input / 1.09361;
+    unitAbbreviation = "m";
+  } else if (from === "meter" && to === "foot") {
+    convertedValue = input * 3.28084;
+    unitAbbreviation = "ft";
+  } else if (from === "foot" && to === "meter") {
+    convertedValue = input / 3.28084;
+    unitAbbreviation = "m";
+  } else if (from === "meter" && to === "inch") {
+    convertedValue = input * 39.3701;
+    unitAbbreviation = "in";
+  } else if (from === "inch" && to === "meter") {
+    convertedValue = input / 39.3701;
+    unitAbbreviation = "m";
+
+  // Temperature conversions
+  } else if (from === "celsius" && to === "fahrenheit") {
+    convertedValue = (input * 9/5) + 32;
+    unitAbbreviation = "°F";
+  } else if (from === "fahrenheit" && to === "celsius") {
+    convertedValue = (input - 32) * 5/9;
+    unitAbbreviation = "°C";
+  } else if (from === "celsius" && to === "kelvin") {
+    convertedValue = parseFloat(input) + 273.15;
+    unitAbbreviation = "K";
+  } else if (from === "kelvin" && to === "celsius") {
+    convertedValue = input - 273.15;
+    unitAbbreviation = "°C";
+  } else if (from === "fahrenheit" && to === "kelvin") {
+    convertedValue = (parseFloat(input) - 32) * 5/9 + 273.15;
+    unitAbbreviation = "K";
+  } else if (from === "kelvin" && to === "fahrenheit") {
+    convertedValue = (parseFloat(input) - 273.15) * 9/5 + 32;
+    unitAbbreviation = "°F";
+
+  // Weight conversions
+  } else if (from === "kilogram" && to === "gram") {
+    convertedValue = input * 1000;
+    unitAbbreviation = "g";
+  } else if (from === "gram" && to === "kilogram") {
+    convertedValue = input / 1000;
+    unitAbbreviation = "kg";
+  } else if (from === "kilogram" && to === "pound") {
+    convertedValue = input * 2.20462;
+    unitAbbreviation = "lb";
+  } else if (from === "pound" && to === "kilogram") {
+    convertedValue = input / 2.20462;
+    unitAbbreviation = "kg";
+  } else if (from === "kilogram" && to === "ounce") {
+    convertedValue = input * 35.274;
+    unitAbbreviation = "oz";
+  } else if (from === "ounce" && to === "kilogram") {
+    convertedValue = input / 35.274;
+    unitAbbreviation = "kg";
+
+  // Volume conversions
+  } else if (from === "liter" && to === "milliliter") {
+    convertedValue = input * 1000;
+    unitAbbreviation = "mL";
+  } else if (from === "milliliter" && to === "liter") {
+    convertedValue = input / 1000;
+    unitAbbreviation = "L";
+  } else if (from === "liter" && to === "gallon") {
+    convertedValue = input * 0.264172;
+    unitAbbreviation = "gal";
+  } else if (from === "gallon" && to === "liter") {
+    convertedValue = input / 0.264172;
+    unitAbbreviation = "L";
+  } else if (from === "liter" && to === "quart") {
+    convertedValue = input * 1.05669;
+    unitAbbreviation = "qt";
+  } else if (from === "quart" && to === "liter") {
+    convertedValue = input / 1.05669;
+    unitAbbreviation = "L";
+  } else if (from === "liter" && to === "pint") {
+    convertedValue = input * 2.11338;
+    unitAbbreviation = "pt";
+  } else if (from === "pint" && to === "liter") {
+    convertedValue = input / 2.11338;
+    unitAbbreviation = "L";
+  } else if (from === "liter" && to === "cup") {
+    convertedValue = input * 4.22675;
+    unitAbbreviation = "cup";
+  } else if (from === "cup" && to === "liter") {
+    convertedValue = input / 4.22675;
+    unitAbbreviation = "L";
+  } else if (from === "liter" && to === "fluid-ounce") {
+    convertedValue = input * 33.814;
+    unitAbbreviation = "fl oz";
+  } else if (from === "fluid-ounce" && to === "liter") {
+    convertedValue = input / 33.814;
+    unitAbbreviation = "L";
+
+  // Liter to Kilogram (assuming density of water: 1 kg/L)
+  } else if (from === "liter" && to === "kilogram") {
+    convertedValue = input * 1; // 1 liter of water weighs approximately 1 kilogram
+    unitAbbreviation = "kg";
+  } else if (from === "kilogram" && to === "liter") {
+    convertedValue = input / 1; // 1 kilogram of water is approximately 1 liter
+    unitAbbreviation = "L";
+
+  // Time conversions
+  } else if (from === "second" && to === "minute") {
+    convertedValue = input / 60;
+    unitAbbreviation = "min";
+  } else if (from === "minute" && to === "second") {
+    convertedValue = input * 60;
+    unitAbbreviation = "s";
+  } else if (from === "second" && to === "hour") {
+    convertedValue = input / 3600;
+    unitAbbreviation = "h";
+  } else if (from === "hour" && to === "second") {
+    convertedValue = input * 3600;
+    unitAbbreviation = "s";
+  } else if (from === "second" && to === "day") {
+    convertedValue = input / 86400;
+    unitAbbreviation = "d";
+  } else if (from === "day" && to === "second") {
+    convertedValue = input * 86400;
+    unitAbbreviation = "s";
+  } else if (from === "second" && to === "week") {
+    convertedValue = input / 604800;
+    unitAbbreviation = "wk";
+  } else if (from === "week" && to === "second") {
+    convertedValue = input * 604800;
+    unitAbbreviation = "s";
+  } else if (from === "second" && to === "year") {
+    convertedValue = input / 31536000;
+    unitAbbreviation = "yr";
+  } else if (from === "year" && to === "second") {
+    convertedValue = input * 31536000;
+    unitAbbreviation = "s";
+  } else if (from === "minute" && to === "hour") {
+    convertedValue = input / 60;
+    unitAbbreviation = "h";
+  } else if (from === "hour" && to === "minute") {
+    convertedValue = input * 60;
+    unitAbbreviation = "min";
+  } else if (from === "minute" && to === "day") {
+    convertedValue = input / 1440;
+    unitAbbreviation = "d";
+  } else if (from === "day" && to === "minute") {
+    convertedValue = input * 1440;
+    unitAbbreviation = "min";
+  } else if (from === "minute" && to === "week") {
+    convertedValue = input / 10080;
+    unitAbbreviation = "wk";
+  } else if (from === "week" && to === "minute") {
+    convertedValue = input * 10080;
+    unitAbbreviation = "min";
+  } else if (from === "minute" && to === "year") {
+    convertedValue = input / 525600;
+    unitAbbreviation = "yr";
+  } else if (from === "year" && to === "minute") {
+    convertedValue = input * 525600;
+    unitAbbreviation = "min";
+  } else if (from === "hour" && to === "day") {
+    convertedValue = input / 24;
+    unitAbbreviation = "d";
+  } else if (from === "day" && to === "hour") {
+    convertedValue = input * 24;
+    unitAbbreviation = "h";
+  } else if (from === "hour" && to === "week") {
+    convertedValue = input / 168;
+    unitAbbreviation = "wk";
+  } else if (from === "week" && to === "hour") {
+    convertedValue = input * 168;
+    unitAbbreviation = "h";
+  } else if (from === "hour" && to === "year") {
+    convertedValue = input / 8760;
+    unitAbbreviation = "yr";
+  } else if (from === "year" && to === "hour") {
+    convertedValue = input * 8760;
+    unitAbbreviation = "h";
+  } else if (from === "day" && to === "week") {
+    convertedValue = input / 7;
+    unitAbbreviation = "wk";
+  } else if (from === "week" && to === "day") {
+    convertedValue = input * 7;
+    unitAbbreviation = "d";
+  } else if (from === "day" && to === "year") {
+    convertedValue = input / 365;
+    unitAbbreviation = "yr";
+  } else if (from === "year" && to === "day") {
+    convertedValue = input * 365;
+    unitAbbreviation = "d";
+  } else if (from === "week" && to === "year") {
+    convertedValue = input / 52;
+    unitAbbreviation = "yr";
+  } else if (from === "year" && to === "week") {
+    convertedValue = input * 52;
+    unitAbbreviation = "wk";
+
+  // Speed conversions
+  } else if (from === "metersPerSecond" && to === "kilometersPerHour") {
+    convertedValue = input * 3.6;
+    unitAbbreviation = "km/h";
+  } else if (from === "kilometersPerHour" && to === "metersPerSecond") {
+    convertedValue = input / 3.6;
+    unitAbbreviation = "m/s";
+  } else if (from === "metersPerSecond" && to === "milesPerHour") {
+    convertedValue = input * 2.23694;
+    unitAbbreviation = "mph";
+  } else if (from === "milesPerHour" && to === "metersPerSecond") {
+    convertedValue = input / 2.23694;
+    unitAbbreviation = "m/s";
+  } else if (from === "kilometersPerHour" && to === "milesPerHour") {
+    convertedValue = input * 0.621371;
+    unitAbbreviation = "mph";
+  } else if (from === "milesPerHour" && to === "kilometersPerHour") {
+    convertedValue = input / 0.621371;
+    unitAbbreviation = "km/h";
+
+  // Area conversions
+  } else if (from === "squareMeter" && to === "squareKilometer") {
+    convertedValue = input / 1000000;
+    unitAbbreviation = "km²";
+  } else if (from === "squareKilometer" && to === "squareMeter") {
+    convertedValue = input * 1000000;
+    unitAbbreviation = "m²";
+  } else if (from === "squareMeter" && to === "squareCentimeter") {
+    convertedValue = input * 10000;
+    unitAbbreviation = "cm²";
+  } else if (from === "squareCentimeter" && to === "squareMeter") {
+    convertedValue = input / 10000;
+    unitAbbreviation = "m²";
+  } else if (from === "squareMeter" && to === "squareMillimeter") {
+    convertedValue = input * 1000000;
+    unitAbbreviation = "mm²";
+  } else if (from === "squareMillimeter" && to === "squareMeter") {
+    convertedValue = input / 1000000;
+    unitAbbreviation = "m²";
+  } else if (from === "squareMeter" && to === "squareInch") {
+    convertedValue = input * 1550;
+    unitAbbreviation = "in²";
+  } else if (from === "squareInch" && to === "squareMeter") {
+    convertedValue = input / 1550;
+    unitAbbreviation = "m²";
+  } else if (from === "squareMeter" && to === "squareFoot") {
+    convertedValue = input * 10.7639;
+    unitAbbreviation = "ft²";
+  } else if (from === "squareFoot" && to === "squareMeter") {
+    convertedValue = input / 10.7639;
+    unitAbbreviation = "m²";
+  } else if (from === "squareMeter" && to === "squareYard") {
+    convertedValue = input * 1.19599;
+    unitAbbreviation = "yd²";
+  } else if (from === "squareYard" && to === "squareMeter") {
+    convertedValue = input / 1.19599;
+    unitAbbreviation = "m²";
+  } else if (from === "squareMeter" && to === "acre") {
+    convertedValue = input * 0.000247105;
+    unitAbbreviation = "acre";
+  } else if (from === "acre" && to === "squareMeter") {
+    convertedValue = input / 0.000247105;
+    unitAbbreviation = "m²";
+  } else if (from === "squareMeter" && to === "hectare") {
+    convertedValue = input / 10000;
+    unitAbbreviation = "ha";
+  } else if (from === "hectare" && to === "squareMeter") {
+    convertedValue = input * 10000;
+    unitAbbreviation = "m²";
+  } else if (from === "squareKilometer" && to === "squareCentimeter") {
+    convertedValue = input * 10000000000;
+    unitAbbreviation = "cm²";
+  } else if (from === "squareCentimeter" && to === "squareKilometer") {
+    convertedValue = input / 10000000000;
+    unitAbbreviation = "km²";
+  } else if (from === "squareKilometer" && to === "squareMillimeter") {
+    convertedValue = input * 1000000000000;
+    unitAbbreviation = "mm²";
+  } else if (from === "squareMillimeter" && to === "squareKilometer") {
+    convertedValue = input / 1000000000000;
+    unitAbbreviation = "km²";
+  } else if (from === "squareKilometer" && to === "squareInch") {
+    convertedValue = input * 1550000000;
+    unitAbbreviation = "in²";
+  } else if (from === "squareInch" && to === "squareKilometer") {
+    convertedValue = input / 1550000000;
+    unitAbbreviation = "km²";
+  } else if (from === "squareKilometer" && to === "squareFoot") {
+    convertedValue = input * 10763900;
+    unitAbbreviation = "ft²";
+  } else if (from === "squareFoot" && to === "squareKilometer") {
+    convertedValue = input / 10763900;
+    unitAbbreviation = "km²";
+  } else if (from === "squareKilometer" && to === "squareYard") {
+    convertedValue = input * 1195990;
+    unitAbbreviation = "yd²";
+  } else if (from === "squareYard" && to === "squareKilometer") {
+    convertedValue = input / 1195990;
+    unitAbbreviation = "km²";
+  } else if (from === "squareKilometer" && to === "acre") {
+    convertedValue = input * 247.105;
+    unitAbbreviation = "acre";
+  } else if (from === "acre" && to === "squareKilometer") {
+    convertedValue = input / 247.105;
+    unitAbbreviation = "km²";
+  } else if (from === "squareKilometer" && to === "hectare") {
+    convertedValue = input * 100;
+    unitAbbreviation = "ha";
+  } else if (from === "hectare" && to === "squareKilometer") {
+    convertedValue = input / 100;
+    unitAbbreviation = "km²";
+  } else if (from === "squareCentimeter" && to === "squareMillimeter") {
+    convertedValue = input * 100;
+    unitAbbreviation = "mm²";
+  } else if (from === "squareMillimeter" && to === "squareCentimeter") {
+    convertedValue = input / 100;
+    unitAbbreviation = "cm²";
+  } else if (from === "squareCentimeter" && to === "squareInch") {
+    convertedValue = input * 0.1550;
+    unitAbbreviation = "in²";
+  } else if (from === "squareInch" && to === "squareCentimeter") {
+    convertedValue = input / 0.1550;
+    unitAbbreviation = "cm²";
+  } else if (from === "squareCentimeter" && to === "squareFoot") {
+    convertedValue = input * 0.00107639;
+    unitAbbreviation = "ft²";
+  } else if (from === "squareFoot" && to === "squareCentimeter") {
+    convertedValue = input / 0.00107639;
+    unitAbbreviation = "cm²";
+} else if (from === "squareCentimeter" && to === "squareYard") {
+    convertedValue = input * 0.000119599;
+    unitAbbreviation = "yd²";
+  } else if (from === "squareYard" && to === "squareCentimeter") {
+    convertedValue = input / 0.000119599;
+    unitAbbreviation = "cm²";
+  } else if (from === "squareCentimeter" && to === "acre") {
+    convertedValue = input * 0.000000247105;
+    unitAbbreviation = "acre";
+  } else if (from === "acre" && to === "squareCentimeter") {
+    convertedValue = input / 0.000000247105;
+    unitAbbreviation = "cm²";
+  } else if (from === "squareCentimeter" && to === "hectare") {
+    convertedValue = input / 100000000;
+    unitAbbreviation = "ha";
+  } else if (from === "hectare" && to === "squareCentimeter") {
+    convertedValue = input * 100000000;
+    unitAbbreviation = "cm²";
+  } else if (from === "squareMillimeter" && to === "squareInch") {
+    convertedValue = input * 0.001550;
+    unitAbbreviation = "in²";
+  } else if (from === "squareInch" && to === "squareMillimeter") {
+    convertedValue = input / 0.001550;
+    unitAbbreviation = "mm²";
+  } else if (from === "squareMillimeter" && to === "squareFoot") {
+    convertedValue = input * 0.0000107639;
+    unitAbbreviation = "ft²";
+  } else if (from === "squareFoot" && to === "squareMillimeter") {
+    convertedValue = input / 0.0000107639;
+    unitAbbreviation = "mm²";
+  } else if (from === "squareMillimeter" && to === "squareYard") {
+    convertedValue = input * 0.00000119599;
+    unitAbbreviation = "yd²";
+  } else if (from === "squareYard" && to === "squareMillimeter") {
+    convertedValue = input / 0.00000119599;
+    unitAbbreviation = "mm²";
+  } else if (from === "squareMillimeter" && to === "acre") {
+    convertedValue = input * 2.47105e-10;
+    unitAbbreviation = "acre";
+  } else if (from === "acre" && to === "squareMillimeter") {
+    convertedValue = input / 2.47105e-10;
+    unitAbbreviation = "mm²";
+  } else if (from === "squareMillimeter" && to === "hectare") {
+    convertedValue = input / 10000000000;
+    unitAbbreviation = "ha";
+  } else if (from === "hectare" && to === "squareMillimeter") {
+    convertedValue = input * 10000000000;
+    unitAbbreviation = "mm²";
+  } else if (from === "squareInch" && to === "squareFoot") {
+    convertedValue = input / 144;
+    unitAbbreviation = "ft²";
+  } else if (from === "squareFoot" && to === "squareInch") {
+    convertedValue = input * 144;
+    unitAbbreviation = "in²";
+  } else if (from === "squareInch" && to === "squareYard") {
+    convertedValue = input / 1296;
+    unitAbbreviation = "yd²";
+  } else if (from === "squareYard" && to === "squareInch") {
+    convertedValue = input * 1296;
+    unitAbbreviation = "in²";
+  } else if (from === "squareInch" && to === "acre") {
+    convertedValue = input / 6272640;
+    unitAbbreviation = "acre";
+  } else if (from === "acre" && to === "squareInch") {
+    convertedValue = input * 6272640;
+    unitAbbreviation = "in²";
+  } else if (from === "squareInch" && to === "hectare") {
+    convertedValue = input / 15500031;
+    unitAbbreviation = "ha";
+  } else if (from === "hectare" && to === "squareInch") {
+    convertedValue = input * 15500031;
+    unitAbbreviation = "in²";
+  } else if (from === "squareFoot" && to === "squareYard") {
+    convertedValue = input / 9;
+    unitAbbreviation = "yd²";
+  } else if (from === "squareYard" && to === "squareFoot") {
+    convertedValue = input * 9;
+    unitAbbreviation = "ft²";
+  } else if (from === "squareFoot" && to === "acre") {
+    convertedValue = input / 43560;
+    unitAbbreviation = "acre";
+  } else if (from === "acre" && to === "squareFoot") {
+    convertedValue = input * 43560;
+    unitAbbreviation = "ft²";
+  } else if (from === "squareFoot" && to === "hectare") {
+    convertedValue = input / 107639;
+    unitAbbreviation = "ha";
+  } else if (from === "hectare" && to === "squareFoot") {
+    convertedValue = input * 107639;
+    unitAbbreviation = "ft²";
+  } else if (from === "squareYard" && to === "acre") {
+    convertedValue = input / 4840;
+    unitAbbreviation = "acre";
+  } else if (from === "acre" && to === "squareYard") {
+    convertedValue = input * 4840;
+    unitAbbreviation = "yd²";
+  } else if (from === "squareYard" && to === "hectare") {
+    convertedValue = input / 11959.9;
+    unitAbbreviation = "ha";
+  } else if (from === "hectare" && to === "squareYard") {
+    convertedValue = input * 11959.9;
+    unitAbbreviation = "yd²";
+  } else if (from === "acre" && to === "hectare") {
+    convertedValue = input * 0.404686;
+    unitAbbreviation = "ha";
+  } else if (from === "hectare" && to === "acre") {
+    convertedValue = input / 0.404686;
+    unitAbbreviation = "acre";
+
+  // Data conversions
+  } else if (from === "byte" && to === "kilobyte") {
+    convertedValue = input / 1024;
+    unitAbbreviation = "KB";
+  } else if (from === "kilobyte" && to === "byte") {
+    convertedValue = input * 1024;
+    unitAbbreviation = "B";
+  } else if (from === "byte" && to === "megabyte") {
+    convertedValue = input / 1048576;
+    unitAbbreviation = "MB";
+  } else if (from === "megabyte" && to === "byte") {
+    convertedValue = input * 1048576;
+    unitAbbreviation = "B";
+  } else if (from === "byte" && to === "gigabyte") {
+    convertedValue = input / 1073741824;
+    unitAbbreviation = "GB";
+  } else if (from === "gigabyte" && to === "byte") {
+    convertedValue = input * 1073741824;
+    unitAbbreviation = "B";
+  } else if (from === "byte" && to === "terabyte") {
+    convertedValue = input / 1099511627776;
+    unitAbbreviation = "TB";
+  } else if (from === "terabyte" && to === "byte") {
+    convertedValue = input * 1099511627776;
+    unitAbbreviation = "B";
+  } else if (from === "byte" && to === "petabyte") {
+    convertedValue = input / 1125899906842624;
+    unitAbbreviation = "PB";
+  } else if (from === "petabyte" && to === "byte") {
+    convertedValue = input * 1125899906842624;
+    unitAbbreviation = "B";
+  } else if (from === "kilobyte" && to === "megabyte") {
+    convertedValue = input / 1024;
+    unitAbbreviation = "MB";
+  } else if (from === "megabyte" && to === "kilobyte") {
+    convertedValue = input * 1024;
+    unitAbbreviation = "KB";
+  } else if (from === "kilobyte" && to === "gigabyte") {
+    convertedValue = input / 1048576;
+    unitAbbreviation = "GB";
+  } else if (from === "gigabyte" && to === "kilobyte") {
+    convertedValue = input * 1048576;
+    unitAbbreviation = "KB";
+  } else if (from === "kilobyte" && to === "terabyte") {
+    convertedValue = input / 1073741824;
+    unitAbbreviation = "TB";
+  } else if (from === "terabyte" && to === "kilobyte") {
+    convertedValue = input * 1073741824;
+    unitAbbreviation = "KB";
+  } else if (from === "kilobyte" && to === "petabyte") {
+    convertedValue = input / 1099511627776;
+    unitAbbreviation = "PB";
+  } else if (from === "petabyte" && to === "kilobyte") {
+    convertedValue = input * 1099511627776;
+    unitAbbreviation = "KB";
+  } else if (from === "megabyte" && to === "gigabyte") {
+    convertedValue = input / 1024;
+    unitAbbreviation = "GB";
+  } else if (from === "gigabyte" && to === "megabyte") {
+    convertedValue = input * 1024;
+    unitAbbreviation = "MB";
+  } else if (from === "megabyte" && to === "terabyte") {
+    convertedValue = input / 1048576;
+    unitAbbreviation = "TB";
+  } else if (from === "terabyte" && to === "megabyte") {
+    convertedValue = input * 1048576;
+    unitAbbreviation = "MB";
+  } else if (from === "megabyte" && to === "petabyte") {
+    convertedValue = input / 1073741824;
+    unitAbbreviation = "PB";
+  } else if (from === "petabyte" && to === "megabyte") {
+    convertedValue = input * 1073741824;
+    unitAbbreviation = "MB";
+  } else if (from === "gigabyte" && to === "terabyte") {
+    convertedValue = input / 1024;
+    unitAbbreviation = "TB";
+  } else if (from === "terabyte" && to === "gigabyte") {
+    convertedValue = input * 1024;
+    unitAbbreviation = "GB";
+  } else if (from === "gigabyte" && to === "petabyte") {
+    convertedValue = input / 1048576;
+    unitAbbreviation = "PB";
+  } else if (from === "petabyte" && to === "gigabyte") {
+    convertedValue = input * 1048576;
+    unitAbbreviation = "GB";
+  } else if (from === "terabyte" && to === "petabyte") {
+    convertedValue = input / 1024;
+    unitAbbreviation = "PB";
+  } else if (from === "petabyte" && to === "terabyte") {
+    convertedValue = input * 1024;
+    unitAbbreviation = "TB";
+
+
+  // Energy conversions
+  } else if (from === "joule" && to === "calorie") {
+    convertedValue = input / 4.184;
+    unitAbbreviation = "cal";
+  } else if (from === "calorie" && to === "joule") {
+    convertedValue = input * 4.184;
+    unitAbbreviation = "J";
+  } else if (from === "joule" && to === "kilowattHour") {
+    convertedValue = input / 3600000;
+    unitAbbreviation = "kWh";
+  } else if (from === "kilowattHour" && to === "joule") {
+    convertedValue = input * 3600000;
+    unitAbbreviation = "J";
+  } else if (from === "calorie" && to === "kilowattHour") {
+    convertedValue = input / 860421;
+    unitAbbreviation = "kWh";
+  } else if (from === "kilowattHour" && to === "calorie") {
+    convertedValue = input * 860421;
+    unitAbbreviation = "cal";
+
+  // Pressure conversions
+  } else if (from === "pascal" && to === "bar") {
+    convertedValue = input / 100000;
+    unitAbbreviation = "bar";
+  } else if (from === "bar" && to === "pascal") {
+    convertedValue = input * 100000;
+    unitAbbreviation = "Pa";
+  } else if (from === "pascal" && to === "atmosphere") {
+    convertedValue = input / 101325;
+    unitAbbreviation = "atm";
+  } else if (from === "atmosphere" && to === "pascal") {
+    convertedValue = input * 101325;
+    unitAbbreviation = "Pa";
+  } else if (from === "pascal" && to === "psi") {
+    convertedValue = input / 6894.76;
+    unitAbbreviation = "psi";
+  } else if (from === "psi" && to === "pascal") {
+    convertedValue = input * 6894.76;
+    unitAbbreviation = "Pa";
+  } else if (from === "bar" && to === "atmosphere") {
+    convertedValue = input / 1.01325;
+    unitAbbreviation = "atm";
+  } else if (from === "atmosphere" && to === "bar") {
+    convertedValue = input * 1.01325;
+    unitAbbreviation = "bar";
+  } else if (from === "bar" && to === "psi") {
+    convertedValue = input * 14.5038;
+    unitAbbreviation = "psi";
+  } else if (from === "psi" && to === "bar") {
+    convertedValue = input / 14.5038;
+    unitAbbreviation = "bar";
+  } else if (from === "atmosphere" && to === "psi") {
+    convertedValue = input * 14.6959;
+    unitAbbreviation = "psi";
+  } else if (from === "psi" && to === "atmosphere") {
+    convertedValue = input / 14.6959;
+    unitAbbreviation = "atm";
+
+  // Power conversions
+  } else if (from === "watt" && to === "kilowatt") {
+    convertedValue = input / 1000;
+    unitAbbreviation = "kW";
+  } else if (from === "kilowatt" && to === "watt") {
+    convertedValue = input * 1000;
+    unitAbbreviation = "W";
+  } else if (from === "watt" && to === "horsepower") {
+    convertedValue = input / 745.7;
+    unitAbbreviation = "hp";
+  } else if (from === "horsepower" && to === "watt") {
+    convertedValue = input * 745.7;
+    unitAbbreviation = "W";
+  } else if (from === "kilowatt" && to === "horsepower") {
+    convertedValue = input * 1.34102;
+    unitAbbreviation = "hp";
+  } else if (from === "horsepower" && to === "kilowatt") {
+    convertedValue = input / 1.34102;
+    unitAbbreviation = "kW";
+
+  
+  } else if (from === to) {
+    convertedValue = input;
+    unitAbbreviation = from.split(" ")[1]; // Extract abbreviation from option text
+  }
+
+  
+  if (convertedValue !== undefined) {
+    result.innerHTML = convertedValue + " " + unitAbbreviation;
+  } else {
+    result.innerHTML = "Conversion not supported.";
+  }
+}
+
+function showSearch() {
+  document.querySelector(".search-container").style.display = "block";
+}
+
+
+document.getElementById("searchInput").addEventListener("keyup", function() {
+  var input, filter, optgroup, option, i, txtValue;
+  input = document.getElementById("searchInput");
+  filter = input.value.toUpperCase();
+  optgroup = document.querySelectorAll("#from optgroup, #to optgroup"); // Select both From and To optgroups
+
+  for (i = 0; i < optgroup.length; i++) {
+    option = optgroup[i].getElementsByTagName("option");
+    for (var j = 0; j < option.length; j++) {
+      txtValue = option[j].textContent || option[j].innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        option[j].style.display = "";
+      } else {
+        option[j].style.display = "none";
+      }
+    }
+  }
+});
+
+function filterToOptions() {
+  var from = document.getElementById("from").value;
+  var toOptions = document.getElementById("to").options;
+
+  for (var i = 0; i < toOptions.length; i++) {
+    if (from === toOptions[i].value) {
+      toOptions[i].style.display = "none";
+    } else {
+      toOptions[i].style.display = "";
+    }
+  }
+}
+</script>
+</body>
+</html>
