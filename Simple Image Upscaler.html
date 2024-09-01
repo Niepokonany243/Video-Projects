@@ -1,195 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Upscaler</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f4f4f4;
-      color: #333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Image Upscaler/Downscaler</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
 
-    h1 {
-      text-align: center;
-      color: #2980b9;
-    }
+        h1 {
+            text-align: center;
+            color: #2980b9;
+        }
 
-    #container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
-    input[type="file"], select, button {
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 16px;
-    }
+        input[type="file"],
+        select,
+        button {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
 
-    img {
-      max-width: 100%;
-      height: auto;
-      margin-top: 20px;
-      border-radius: 4px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
-    #loading {
-      display: none;
-      margin-top: 20px;
-      font-size: 18px;
-      color: #27ae60;
-    }
+        #loading {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #27ae60;
+        }
 
-    #timeLeft {
-      display: none;
-      margin-top: 10px;
-      font-size: 16px;
-      color: #7f8c8d;
-    }
+        #timeLeft {
+            display: none;
+            margin-top: 10px;
+            font-size: 16px;
+            color: #7f8c8d;
+        }
 
-    #downloadLink {
-      display: none;
-      margin-top: 20px;
-      font-size: 18px;
-      color: #3498db;
-      text-decoration: none;
-    }
+        #progressBar {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
 
-    #history {
-      margin-top: 20px;
-      border-collapse: collapse;
-      width: 100%;
-    }
+        #progressBarFill {
+            height: 20px;
+            background-color: #27ae60;
+            width: 0%;
+            transition: width 0.2s ease-in-out;
+        }
 
-    #history th, #history td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
+        #downloadLink {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #3498db;
+            text-decoration: none;
+        }
 
-    #history th {
-      background-color: #f2f2f2;
-    }
-  </style>
+        #history {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #history th,
+        #history td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #history th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
+
 <body>
-  <h1>Image Upscaler</h1>
+    <h1>Advanced Image Upscaler/Downscaler</h1>
 
-  <div id="container">
-    <input type="file" id="imageUpload" accept="image/*">
-    <select id="scaleSelect">
-      <option value="2">2x</option>
-      <option value="3">3x</option>
-      <option value="4">4x</option>
-    </select>
-    <button id="upscaleButton">Upscale</button>
+    <div id="container">
+        <input type="file" id="imageUpload" accept="image/*">
+        <select id="scaleSelect">
+            <option value="0.25">0.25x (Downscale)</option>
+            <option value="0.5">0.5x (Downscale)</option>
+            <option value="0.75">0.75x (Downscale)</option>
+            <option value="1.5">1.5x (Upscale)</option>
+            <option value="2">2x (Upscale)</option>
+            <option value="3">3x (Upscale)</option>
+            <option value="4">4x (Upscale)</option>
+        </select>
+        <select id="algorithmSelect">
+            <option value="nearestNeighbor">Nearest Neighbor</option>
+            <option value="bilinear">Bilinear</option>
+            <option value="bicubic">Bicubic</option>
+        </select>
+        <button id="processButton">Process</button>
 
-    <img id="originalImage" src="#" alt="Original Image" style="display: none;">
+        <img id="originalImage" src="#" alt="Original Image" style="display: none;">
 
-    <div id="loading">Upscaling... Please wait.</div>
-    <div id="timeLeft"></div>
-    <a id="downloadLink" href="#" download="upscaled_image.png">Download Upscaled Image</a>
+        <div id="loading">Processing... Please wait.</div>
+        <div id="timeLeft"></div>
+        <div id="progressBar">
+            <div id="progressBarFill"></div>
+        </div>
+        <canvas id="processedCanvas" style="display: none;"></canvas>
+        <a id="downloadLink" href="#" download="processed_image.png">Download Processed Image</a>
 
-    <h2>Upscaling History</h2>
-    <table id="history">
-      <thead>
-        <tr>
-          <th>Original Image</th>
-          <th>Scale Factor</th>
-          <th>Upscaled Image</th>
-          <th>Time Taken (seconds)</th>
-        </tr>
-      </thead>
-      <tbody></tbody> 
-    </table>
-  </div>
+        <h2>Processing History</h2>
+        <table id="history">
+            <thead>
+                <tr>
+                    <th>Original Image</th>
+                    <th>Scale Factor</th>
+                    <th>Algorithm</th>
+                    <th>Processed Image</th>
+                    <th>Time Taken (seconds)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-  <script>
-    const imageUpload = document.getElementById('imageUpload');
-    const scaleSelect = document.getElementById('scaleSelect');
-    const upscaleButton = document.getElementById('upscaleButton');
-    const originalImage = document.getElementById('originalImage');
-    const loading = document.getElementById('loading');
-    const timeLeft = document.getElementById('timeLeft');
-    const downloadLink = document.getElementById('downloadLink');
-    const historyTable = document.getElementById('history').getElementsByTagName('tbody')[0];
+    <script>
+        const imageUpload = document.getElementById('imageUpload');
+        const scaleSelect = document.getElementById('scaleSelect');
+        const algorithmSelect = document.getElementById('algorithmSelect');
+        const processButton = document.getElementById('processButton');
+        const originalImage = document.getElementById('originalImage');
+        const loading = document.getElementById('loading');
+        const timeLeft = document.getElementById('timeLeft');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const processedCanvas = document.getElementById('processedCanvas');
+        const downloadLink = document.getElementById('downloadLink');
+        const historyTable = document.getElementById('history').getElementsByTagName('tbody')[0];
 
-    let startTime;
+        let startTime;
+        let intervalId;
 
-    upscaleButton.addEventListener('click', () => {
-      const file = imageUpload.files[0];
-      const scaleFactor = parseInt(scaleSelect.value);
+        function estimateProcessingTime(width, height, scaleFactor, algorithm) {
+            let iterations = 1000000;
+            let estimationFactor = 50;
 
-      if (!file) {
-        alert("Please select an image first!");
-        return;
-      }
+            if (algorithm === "bicubic") {
+                iterations = 500000;
+                estimationFactor = 100;
+            } else if (algorithm === "bilinear") {
+                iterations = 750000;
+                estimationFactor = 75;
+            }
 
-      upscaleButton.disabled = true;
-      imageUpload.disabled = true;
+            const benchmarkStart = performance.now();
+            for (let i = 0; i < iterations; i++) { }
+            const benchmarkEnd = performance.now();
+            const benchmarkTime = benchmarkEnd - benchmarkStart;
 
-      const reader = new FileReader();
+            return (width * height * scaleFactor * benchmarkTime) / (iterations * estimationFactor);
+        }
 
-      reader.onload = (e) => {
-        originalImage.src = e.target.result;
-        originalImage.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+        processButton.addEventListener('click', () => {
+            const file = imageUpload.files[0];
+            const scaleFactor = parseFloat(scaleSelect.value);
+            const algorithm = algorithmSelect.value;
 
-          canvas.width = originalImage.width * scaleFactor;
-          canvas.height = originalImage.height * scaleFactor;
+            if (!file) {
+                alert("Please select an image first!");
+                return;
+            }
 
-          ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+            processButton.disabled = true;
+            imageUpload.disabled = true;
 
-          loading.style.display = 'block';
-          timeLeft.style.display = 'block';
-          startTime = Date.now();
+            const reader = new FileReader();
 
-          canvas.toBlob((blob) => {
-            const endTime = Date.now();
-            const timeTaken = (endTime - startTime) / 1000; 
+            reader.onload = (e) => {
+                originalImage.src = e.target.result;
+                originalImage.onload = () => {
+                    const ctx = processedCanvas.getContext('2d');
 
-            const url = URL.createObjectURL(blob);
+                    processedCanvas.width = originalImage.width * scaleFactor;
+                    processedCanvas.height = originalImage.height * scaleFactor;
 
-            downloadLink.href = url;
-            downloadLink.style.display = 'block';
-            loading.style.display = 'none';
-            timeLeft.style.display = 'none';
+                    if (algorithm === "nearestNeighbor") {
+                        ctx.imageSmoothingEnabled = false;
+                    } else if (algorithm === "bilinear" || algorithm === "bicubic") {
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = algorithm;
+                    }
 
-            addToHistory(originalImage.src, scaleFactor, url, timeTaken);
+                    ctx.drawImage(originalImage, 0, 0, processedCanvas.width, processedCanvas.height);
 
-            upscaleButton.disabled = false;
-            imageUpload.disabled = false;
-          }, 'image/png');
-        };
-      };
+                    loading.style.display = 'block';
+                    timeLeft.style.display = 'block';
+                    progressBarFill.style.width = '0%';
+                    startTime = Date.now();
 
-      reader.readAsDataURL(file);
-    });
+                    let estimatedTime = estimateProcessingTime(originalImage.width, originalImage.height, scaleFactor, algorithm);
 
-    function addToHistory(originalSrc, scale, upscaledSrc, timeTaken) {
-      const newRow = historyTable.insertRow();
-      const originalCell = newRow.insertCell();
-      const scaleCell = newRow.insertCell();
-      const upscaledCell = newRow.insertCell();
-      const timeTakenCell = newRow.insertCell();
+                    intervalId = setInterval(() => {
+                        const elapsedTime = (Date.now() - startTime) / 1000;
+                        const remainingTime = Math.max(0, estimatedTime - elapsedTime);
+                        timeLeft.textContent = `Estimated time remaining: ${remainingTime.toFixed(1)} seconds`;
 
-      originalCell.innerHTML = `<img src="${originalSrc}" alt="Original" style="max-width: 100px;">`;
-      scaleCell.textContent = `${scale}x`;
-      upscaledCell.innerHTML = `<a href="${upscaledSrc}" download="upscaled_image.png"><img src="${upscaledSrc}" alt="Upscaled" style="max-width: 100px;"></a>`;
-      timeTakenCell.textContent = timeTaken.toFixed(2); 
-    }
-  </script>
+                        const progress = Math.min(100, (elapsedTime / estimatedTime) * 100);
+                        progressBarFill.style.width = `${progress}%`;
+                    }, 100);
+
+                    const processedImageDataURL = processedCanvas.toDataURL('image/png');
+
+                    downloadLink.href = processedImageDataURL;
+                    downloadLink.style.display = 'block';
+                    loading.style.display = 'none';
+                    timeLeft.style.display = 'none';
+
+                    addToHistory(originalImage.src, scaleFactor, algorithm, processedImageDataURL, (Date.now() - startTime) / 1000);
+
+                    processButton.disabled = false;
+                    imageUpload.disabled = false;
+                };
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        function addToHistory(originalSrc, scale, algorithm, processedSrc, timeTaken) {
+            const newRow = historyTable.insertRow();
+            const originalCell = newRow.insertCell();
+            const scaleCell = newRow.insertCell();
+            const algorithmCell = newRow.insertCell();
+            const processedCell = newRow.insertCell();
+            const timeTakenCell = newRow.insertCell();
+
+            originalCell.innerHTML = `<img src="${originalSrc}" alt="Original" style="max-width: 100px;">`;
+            scaleCell.textContent = `${scale}x`;
+            algorithmCell.textContent = algorithm;
+            processedCell.innerHTML = `<a href="${processedSrc}" download="processed_image.png"><img src="${processedSrc}" alt="Processed" style="max-width: 100px;"></a>`;
+            timeTakenCell.textContent = timeTaken.toFixed(2);
+        }
+    </script>
 </body>
+
 </html>
