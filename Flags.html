@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Flags of the World Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-image: url('https://www.link-to-your-background-image.com/image.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+
+    #mainMenu,
+    #quizContainer,
+    #resultsContainer {
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 90%;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    #mainMenu button,
+    #quizContainer button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    #mainMenu button:hover,
+    #quizContainer button:hover {
+      background-color: #0056b3;
+    }
+
+    #flagImage {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    #optionsList button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+      color: #343a40;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    #optionsList button:hover {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    #resultsContainer p {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    #timer {
+      margin-top: 10px;
+    }
+
+    #progressBar {
+      width: 90%;
+      height: 10px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    #progress {
+      height: 100%;
+      background-color: #007bff;
+      border-radius: 5px;
+      width: 0%;
+    }
+
+    #notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      display: none;
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="notification"></div>
+
+  <div id="mainMenu">
+    <h1>Flags of the World Quiz</h1>
+    <button onclick="startQuiz('easy')">Easy</button>
+    <button onclick="startQuiz('medium')">Medium</button>
+    <button onclick="startQuiz('hard')">Hard</button>
+  </div>
+
+  <div id="quizContainer" style="display: none;">
+    <img id="flagImage" src="" alt="Flag">
+    <div id="optionsList"></div>
+    <p>Score: <span id="score">0</span></p>
+    <div id="timer">Time Left: <span id="timeLeft">60</span> seconds</div>
+    <div id="progressBar">
+      <div id="progress"></div>
+    </div>
+  </div>
+
+  <div id="resultsContainer" style="display: none;">
+    <h2>Quiz Results</h2>
+    <p>Final Score: <span id="finalScore"></span></p>
+    <button onclick="showMainMenu()">Main Menu</button>
+  </div>
+
+  <audio id="backgroundMusic" loop>
+    <source src="https://www.link-to-your-music-file.com/music.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    const flagsData = {
+      easy: [
+        { country: "United States", image: "https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg" },
+        { country: "Canada", image: "https://upload.wikimedia.org/wikipedia/commons/d/d9/Flag_of_Canada_%28official%29.svg" },
+        { country: "Mexico", image: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Flag_of_Mexico.svg" },
+        { country: "Brazil", image: "https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg" },
+        { country: "United Kingdom", image: "https://upload.wikimedia.org/wikipedia/en/a/ae/Flag_of_the_United_Kingdom.svg" },
+        { country: "France", image: "https://upload.wikimedia.org/wikipedia/en/c/c3/Flag_of_France.svg" },
+        { country: "Germany", image: "https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg" },
+        { country: "Italy", image: "https://upload.wikimedia.org/wikipedia/en/0/03/Flag_of_Italy.svg" },
+        { country: "Spain", image: "https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg" },
+        { country: "China", image: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Flag_of_the_People%27s_Republic_of_China.svg" },
+        { country: "Japan", image: "https://upload.wikimedia.org/wikipedia/en/9/9e/Flag_of_Japan.svg" },
+        { country: "Australia", image: "https://upload.wikimedia.org/wikipedia/commons/8/88/Flag_of_Australia_%28converted%29.svg" },
+        { country: "India", image: "https://upload.wikimedia.org/wikipedia/en/4/41/Flag_of_India.svg" },
+        { country: "Russia", image: "https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" },
+        { country: "South Africa", image: "https://upload.wikimedia.org/wikipedia/commons/a/a1/Flag_of_South_Africa.svg" },
+        { country: "Argentina", image: "https://upload.wikimedia.org/wikipedia/commons/2/27/Flag_of_Argentina.svg" },
+        { country: "South Korea", image: "https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg" },
+        { country: "Switzerland", image: "https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Switzerland.svg" },
+        { country: "Netherlands", image: "https://upload.wikimedia.org/wikipedia/commons/2/20/Flag_of_the_Netherlands.svg" },
+        { country: "Sweden", image: "https://upload.wikimedia.org/wikipedia/en/4/4c/Flag_of_Sweden.svg" },
+        { country: "Ireland", image: "https://upload.wikimedia.org/wikipedia/commons/4/45/Flag_of_Ireland.svg" },
+        { country: "Belgium", image: "https://upload.wikimedia.org/wikipedia/commons/6/65/Flag_of_Belgium.svg" },
+        { country: "Portugal", image: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_Portugal.svg" },
+        { country: "Greece", image: "https://upload.wikimedia.org/wikipedia/commons/c/c9/Flag_of_Greece.svg" },
+        { country: "Austria", image: "https://upload.wikimedia.org/wikipedia/commons/4/41/Flag_of_Austria.svg" },
+        { country: "Denmark", image: "https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Denmark.svg" },
+        { country: "Norway", image: "https://upload.wikimedia.org/wikipedia/commons/d/d9/Flag_of_Norway.svg" },
+        { country: "Finland", image: "https://upload.wikimedia.org/wikipedia/commons/b/bc/Flag_of_Finland.svg" },
+        { country: "Poland", image: "https://upload.wikimedia.org/wikipedia/en/1/12/Flag_of_Poland.svg" },
+        { country: "Czech Republic", image: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_the_Czech_Republic.svg" },
+        { country: "Hungary", image: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Flag_of_Hungary.svg" },
+        { country: "Turkey", image: "https://upload.wikimedia.org/wikipedia/commons/b/b4/Flag_of_Turkey.svg" },
+        { country: "Israel", image: "https://upload.wikimedia.org/wikipedia/commons/d/d4/Flag_of_Israel.svg" },
+        { country: "Egypt", image: "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flag_of_Egypt.svg" },
+        { country: "Saudi Arabia", image: "https://upload.wikimedia.org/wikipedia/commons/0/0d/Flag_of_Saudi_Arabia.svg" },
+        { country: "United Arab Emirates", image: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_the_United_Arab_Emirates.svg" }
+      ],
+      medium: [
+        { country: "Afghanistan", image: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_the_Islamic_Emirate_of_Afghanistan.svg" },
+        { country: "Albania", image: "https://upload.wikimedia.org/wikipedia/commons/3/36/Flag_of_Albania.svg" },
+        { country: "Algeria", image: "https://upload.wikimedia.org/wikipedia/commons/7/77/Flag_of_Algeria.svg" },
+        { country: "Andorra", image: "https://upload.wikimedia.org/wikipedia/commons/1/19/Flag_of_Andorra.svg" },
+        { country: "Angola", image: "https://upload.wikimedia.org/wikipedia/commons/9/9d/Flag_of_Angola.svg" },
+        { country: "Antigua and Barbuda", image: "https://upload.wikimedia.org/wikipedia/commons/8/89/Flag_of_Antigua_and_Barbuda.svg" },
+        { country: "Armenia", image: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Flag_of_Armenia.svg" },
+        { country: "Azerbaijan", image: "https://upload.wikimedia.org/wikipedia/commons/d/dd/Flag_of_Azerbaijan.svg" },
+        { country: "Bahamas", image: "https://upload.wikimedia.org/wikipedia/commons/9/93/Flag_of_the_Bahamas.svg" },
+        { country: "Bahrain", image: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Flag_of_Bahrain.svg" },
+        { country: "Bangladesh", image: "https://upload.wikimedia.org/wikipedia/commons/f/f9/Flag_of_Bangladesh.svg" },
+        { country: "Barbados", image: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Flag_of_Barbados.svg" },
+        { country: "Belarus", image: "https://upload.wikimedia.org/wikipedia/commons/8/85/Flag_of_Belarus.svg" },
+        { country: "Belize", image: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Flag_of_Belize.svg" },
+        { country: "Benin", image: "https://upload.wikimedia.org/wikipedia/commons/0/0a/Flag_of_Benin.svg" },
+        { country: "Bhutan", image: "https://upload.wikimedia.org/wikipedia/commons/9/91/Flag_of_Bhutan.svg" },
+        { country: "Bolivia", image: "https://upload.wikimedia.org/wikipedia/commons/4/48/Flag_of_Bolivia.svg" },
+        { country: "Bosnia and Herzegovina", image: "https://upload.wikimedia.org/wikipedia/commons/b/bf/Flag_of_Bosnia_and_Herzegovina.svg" },
+        { country: "Botswana", image: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Flag_of_Botswana.svg" },
+        { country: "Brunei", image: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Flag_of_Brunei.svg" },
+        { country: "Bulgaria", image: "https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Bulgaria.svg" },
+        { country: "Burkina Faso", image: "https://upload.wikimedia.org/wikipedia/commons/3/31/Flag_of_Burkina_Faso.svg" },
+        { country: "Burundi", image: "https://upload.wikimedia.org/wikipedia/commons/5/50/Flag_of_Burundi.svg" },
+        { country: "Cabo Verde", image: "https://upload.wikimedia.org/wikipedia/commons/3/38/Flag_of_Cape_Verde.svg" },
+        { country: "Cambodia", image: "https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_Cambodia.svg" },
+        { country: "Cameroon", image: "https://upload.wikimedia.org/wikipedia/commons/4/4f/Flag_of_Cameroon.svg" },
+        { country: "Central African Republic", image: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Flag_of_the_Central_African_Republic.svg" },
+        { country: "Chad", image: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Flag_of_Chad.svg" },
+        { country: "Chile", image: "https://upload.wikimedia.org/wikipedia/commons/7/78/Flag_of_Chile.svg" },
+        { country: "Colombia", image: "https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Colombia.svg" },
+        { country: "Comoros", image: "https://upload.wikimedia.org/wikipedia/commons/9/94/Flag_of_the_Comoros.svg" },
+        { country: "Congo, Democratic Republic of the", image: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Flag_of_the_Democratic_Republic_of_the_Congo.svg" },
+        { country: "Congo, Republic of the", image: "https://upload.wikimedia.org/wikipedia/commons/9/92/Flag_of_the_Republic_of_the_Congo.svg" },
+        { country: "Costa Rica", image: "https://upload.wikimedia.org/wikipedia/commons/b/bc/Flag_of_Costa_Rica.svg" },
+        { country: "Côte d'Ivoire", image: "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flag_of_C%C3%B4te_d%27Ivoire.svg" },
+        { country: "Croatia", image: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Flag_of_Croatia.svg" },
+        { country: "Cuba", image: "https://upload.wikimedia.org/wikipedia/commons/b/bd/Flag_of_Cuba.svg" },
+        { country: "Cyprus", image: "https://upload.wikimedia.org/wikipedia/commons/d/d4/Flag_of_Cyprus.svg" },
+        { country: "Czechia", image: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_the_Czech_Republic.svg" },
+        { country: "Denmark", image: "https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Denmark.svg" },
+        { country: "Djibouti", image: "https://upload.wikimedia.org/wikipedia/commons/3/34/Flag_of_Djibouti.svg" },
+        { country: "Dominica", image: "https://upload.wikimedia.org/wikipedia/commons/c/c4/Flag_of_Dominica.svg" },
+        { country: "Dominican Republic", image: "https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_the_Dominican_Republic.svg" },
+        { country: "Ecuador", image: "https://upload.wikimedia.org/wikipedia/commons/e/e8/Flag_of_Ecuador.svg" },
+        { country: "El Salvador", image: "https://upload.wikimedia.org/wikipedia/commons/3/34/Flag_of_El_Salvador.svg" },
+        { country: "Equatorial Guinea", image: "https://upload.wikimedia.org/wikipedia/commons/3/31/Flag_of_Equatorial_Guinea.svg" },
+        { country: "Eritrea", image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Flag_of_Eritrea.svg" },
+        { country: "Estonia", image: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Flag_of_Estonia.svg" },
+        { country: "Eswatini", image: "https://upload.wikimedia.org/wikipedia/commons/f/fb/Flag_of_Eswatini.svg" },
+        { country: "Ethiopia", image: "https://upload.wikimedia.org/wikipedia/commons/7/71/Flag_of_Ethiopia.svg" },
+        { country: "Fiji", image: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Flag_of_Fiji.svg" },
+        { country: "Gabon", image: "https://upload.wikimedia.org/wikipedia/commons/0/04/Flag_of_Gabon.svg" },
+        { country: "Gambia", image: "https://upload.wikimedia.org/wikipedia/commons/7/77/Flag_of_The_Gambia.svg" },
+        { country: "Georgia", image: "https://upload.wikimedia.org/wikipedia/commons/0/0c/Flag_of_Georgia.svg" }
+      ],
+      hard: [
+        { country: "Ghana", image: "https://upload.wikimedia.org/wikipedia/commons/1/19/Flag_of_Ghana.svg" },
+        { country: "Greece", image: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_Greece.svg" },
+        { country: "Grenada", image: "https://upload.wikimedia.org/wikipedia/commons/b/bc/Flag_of_Grenada.svg" },
+        { country: "Guatemala", image: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Flag_of_Guatemala.svg" },
+        { country: "Guinea", image: "https://upload.wikimedia.org/wikipedia/commons/e/ed/Flag_of_Guinea.svg" },
+        { country: "Guinea-Bissau", image: "https://upload.wikimedia.org/wikipedia/commons/0/01/Flag_of_Guinea-Bissau.svg" },
+        { country: "Guyana", image: "https://upload.wikimedia.org/wikipedia/commons/9/99/Flag_of_Guyana.svg" },
+        { country: "Haiti", image: "https://upload.wikimedia.org/wikipedia/commons/5/56/Flag_of_Haiti.svg" },
+        { country: "Honduras", image: "https://upload.wikimedia.org/wikipedia/commons/8/82/Flag_of_Honduras.svg" },
+        { country: "Iceland", image: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Iceland.svg" },
+        { country: "Indonesia", image: "https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Indonesia.svg" },
+        { country: "Iran", image: "https://upload.wikimedia.org/wikipedia/commons/c/ca/Flag_of_Iran.svg" },
+        { country: "Iraq", image: "https://upload.wikimedia.org/wikipedia/commons/f/f6/Flag_of_Iraq.svg" },
+        { country: "Jamaica", image: "https://upload.wikimedia.org/wikipedia/commons/0/0a/Flag_of_Jamaica.svg" },
+        { country: "Jordan", image: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Flag_of_Jordan.svg" },
+        { country: "Kazakhstan", image: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Flag_of_Kazakhstan.svg" },
+        { country: "Kenya", image: "https://upload.wikimedia.org/wikipedia/commons/4/49/Flag_of_Kenya.svg" },
+        { country: "Kiribati", image: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Flag_of_Kiribati.svg" },
+        { country: "Kuwait", image: "https://upload.wikimedia.org/wikipedia/commons/a/aa/Flag_of_Kuwait.svg" },
+        { country: "Kyrgyzstan", image: "https://upload.wikimedia.org/wikipedia/commons/c/c7/Flag_of_Kyrgyzstan.svg" },
+        { country: "Laos", image: "https://upload.wikimedia.org/wikipedia/commons/5/56/Flag_of_Laos.svg" },
+        { country: "Latvia", image: "https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Latvia.svg" },
+        { country: "Lebanon", image: "https://upload.wikimedia.org/wikipedia/commons/5/59/Flag_of_Lebanon.svg" },
+        { country: "Lesotho", image: "https://upload.wikimedia.org/wikipedia/commons/4/4a/Flag_of_Lesotho.svg" },
+        { country: "Liberia", image: "https://upload.wikimedia.org/wikipedia/commons/b/b8/Flag_of_Liberia.svg" },
+        { country: "Libya", image: "https://upload.wikimedia.org/wikipedia/commons/0/05/Flag_of_Libya.svg" },
+        { country: "Liechtenstein", image: "https://upload.wikimedia.org/wikipedia/commons/4/47/Flag_of_Liechtenstein.svg" },
+        { country: "Lithuania", image: "https://upload.wikimedia.org/wikipedia/commons/1/11/Flag_of_Lithuania.svg" },
+        { country: "Luxembourg", image: "https://upload.wikimedia.org/wikipedia/commons/d/da/Flag_of_Luxembourg.svg" },
+        { country: "Madagascar", image: "https://upload.wikimedia.org/wikipedia/commons/b/bc/Flag_of_Madagascar.svg" },
+        { country: "Malawi", image: "https://upload.wikimedia.org/wikipedia/commons/d/d1/Flag_of_Malawi.svg" },
+        { country: "Malaysia", image: "https://upload.wikimedia.org/wikipedia/commons/6/66/Flag_of_Malaysia.svg" }
+      ]
+    };
+
+    let currentLevel = "";
+    let currentQuestion = 0;
+    let score = 0;
+    let timerInterval;
+    let timeLeft = 60;
+
+    function startQuiz(level) {
+      document.getElementById("backgroundMusic").play();
+      currentLevel = level;
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("score").textContent = score;
+
+      document.getElementById("mainMenu").style.display = "none";
+      document.getElementById("quizContainer").style.display = "block";
+
+      startTimer();
+      showQuestion();
+    }
+
+    function showQuestion() {
+      let questionData = flagsData[currentLevel][currentQuestion];
+      document.getElementById("flagImage").src = questionData.image;
+      document.getElementById("flagImage").alt = questionData.country + " flag";
+
+      let optionsList = document.getElementById("optionsList");
+      optionsList.innerHTML = "";
+
+      let options = [questionData.country];
+      while (options.length < 4) {
+        let randomCountry = getRandomCountry(currentLevel);
+        if (!options.includes(randomCountry)) {
+          options.push(randomCountry);
+        }
+      }
+
+      shuffleArray(options);
+
+      options.forEach(option => {
+        let button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => checkAnswer(option, questionData.country);
+        optionsList.appendChild(button);
+      });
+
+      updateProgressBar();
+    }
+
+    function checkAnswer(selectedAnswer, correctAnswer) {
+      if (selectedAnswer === correctAnswer) {
+        score++;
+        document.getElementById("score").textContent = score;
+        showNotification("Correct!");
+      } else {
+        showNotification(`Incorrect. The correct answer was ${correctAnswer}.`);
+      }
+
+      currentQuestion++;
+      if (currentQuestion < flagsData[currentLevel].length) {
+        showQuestion();
+      } else {
+        showResults();
+      }
+
+      if (currentQuestion === flagsData[currentLevel].length) {
+        clearInterval(timerInterval);
+      }
+    }
+
+    function showResults() {
+      document.getElementById("quizContainer").style.display = "none";
+      document.getElementById("resultsContainer").style.display = "block";
+      document.getElementById("finalScore").textContent = score;
+      clearInterval(timerInterval);
+    }
+
+    function showMainMenu() {
+      document.getElementById("resultsContainer").style.display = "none";
+      document.getElementById("mainMenu").style.display = "block";
+      document.getElementById("backgroundMusic").pause();
+      document.getElementById("backgroundMusic").currentTime = 0;
+    }
+
+    function getRandomCountry(level) {
+      let randomIndex = Math.floor(Math.random() * flagsData[level].length);
+      return flagsData[level][randomIndex].country;
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function startTimer() {
+      timeLeft = 60;
+      document.getElementById("timeLeft").textContent = timeLeft;
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timeLeft").textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          showNotification("Time's up!");
+          showResults();
+        }
+      }, 1000);
+    }
+
+    function updateProgressBar() {
+      let progressPercentage = (currentQuestion / flagsData[currentLevel].length) * 100;
+      document.getElementById("progress").style.width = progressPercentage + "%";
+    }
+
+    function showNotification(message) {
+      let notification = document.getElementById("notification");
+      notification.textContent = message;
+      notification.style.display = "block";
+
+      setTimeout(() => {
+        notification.style.display = "none";
+      }, 2000);
+    }
+  </script>
+</body>
+
+</html>
