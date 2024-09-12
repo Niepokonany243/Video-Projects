@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <title>Advanced Loan Calculator</title>
+    <style>
+        :root {
+            --primary-color-light: #f4f4f4;
+            --secondary-color-light: #ffffff;
+            --accent-color-light: #3498db;
+            --text-color-light: #000000;
+            --input-border-color: #cccccc;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--primary-color-light);
+            color: var(--text-color-light);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            background: var(--secondary-color-light);
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: var(--text-color-light);
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: var(--accent-color-light);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-size: 16px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            color: var(--text-color-light);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color-light);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: var(--text-color-light);
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            input, select, button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Loan Calculator</h1>
+        <label for="loan-amount">Loan Amount ($):</label>
+        <input type="number" id="loan-amount" placeholder="Enter loan amount" min="0">
+        
+        <label for="interest-rate">Annual Interest Rate (%):</label>
+        <input type="number" id="interest-rate" placeholder="Enter interest rate" min="0" step="0.01">
+        
+        <label for="loan-term">Loan Term (Years):</label>
+        <select id="loan-term">
+            <option value="5">5 Years</option>
+            <option value="10">10 Years</option>
+            <option value="15">15 Years</option>
+            <option value="20">20 Years</option>
+        </select>
+
+        <label for="payment-frequency">Payment Frequency:</label>
+        <select id="payment-frequency">
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+        
+        <button onclick="calculateLoan()">Calculate</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function calculateLoan() {
+            const loanAmount = parseFloat(document.getElementById('loan-amount').value);
+            const interestRate = parseFloat(document.getElementById('interest-rate').value) / 100 / 12;
+            const loanTerm = parseInt(document.getElementById('loan-term').value) * 12;
+            const paymentFrequency = document.getElementById('payment-frequency').value;
+            
+            let paymentsPerYear;
+            if (paymentFrequency === 'monthly') {
+                paymentsPerYear = 12;
+            } else if (paymentFrequency === 'quarterly') {
+                paymentsPerYear = 4;
+            } else if (paymentFrequency === 'yearly') {
+                paymentsPerYear = 1;
+            }
+
+            const totalPayments = loanTerm / (12 / paymentsPerYear);
+            const x = Math.pow(1 + interestRate, loanTerm);
+            const monthlyPayment = (loanAmount * interestRate * x) / (x - 1);
+            const payment = monthlyPayment * (12 / paymentsPerYear);
+            const totalPayment = payment * totalPayments;
+
+            document.getElementById('result').innerHTML = `
+                <strong>Loan Details</strong><br>
+                ${paymentFrequency.charAt(0).toUpperCase() + paymentFrequency.slice(1)} Payment: $${payment.toFixed(2)}<br>
+                Total Payment: $${totalPayment.toFixed(2)}<br>
+                Total Interest: $${(totalPayment - loanAmount).toFixed(2)} (${(((totalPayment - loanAmount) / loanAmount) * 100).toFixed(2)}%)
+            `;
+        }
+    </script>
+</body>
+</html>
