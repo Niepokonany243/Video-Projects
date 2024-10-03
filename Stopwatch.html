@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Stopwatch</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f4;
+            transition: background-color 0.3s ease;
+            color: #333;
+        }
+        body.dark-mode {
+            background-color: #222;
+            color: #eee;
+        }
+        .stopwatch {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            transition: background-color 0.3s ease;
+            width: 90%;
+            max-width: 500px;
+        }
+        body.dark-mode .stopwatch {
+            background-color: #333;
+        }
+        .time {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background-color: #0069d9;
+        }
+        .dark-mode button {
+            background-color: #555;
+            color: #ddd;
+        }
+        .dark-mode button:hover {
+            background-color: #666;
+        }
+        #darkModeToggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+        .dark-mode #darkModeToggle {
+            color: #eee;
+        }
+        #lapsContainer {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+            width: 90%;
+            max-width: 500px;
+        }
+        body.dark-mode #lapsContainer {
+            background-color: #333;
+            border-color: #555;
+        }
+        #laps {
+            list-style: none;
+            padding: 0;
+        }
+        #laps li {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+            color: #555;
+        }
+        body.dark-mode #laps li {
+            color: #ccc;
+        }
+        #laps li button {
+            background-color: #dc3545;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+        #laps li button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+<button id="darkModeToggle">☀</button>
+<div class="stopwatch">
+    <div class="time" id="display">00:00:00.000</div>
+    <button id="startButton" onclick="start()">Start</button>
+    <button id="stopButton" onclick="stop()" style="display: none;">Stop</button>
+    <button id="resetButton" onclick="reset()" style="display: none;">Reset</button>
+    <button id="lapButton" onclick="lap()" style="display: none;">Lap</button>
+</div>
+<h2>Laps:</h2>
+<div id="lapsContainer">
+    <ul id="laps"></ul>
+</div>
+
+<script>
+
+    let startTime, updatedTime, difference, timerInterval;
+    let running = false;
+    let darkMode = false;
+    let lapCounter = 1;
+    let laps = [];
+
+    const display = document.getElementById('display');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const resetButton = document.getElementById('resetButton');
+    const lapButton = document.getElementById('lapButton');
+    const lapsList = document.getElementById('laps');
+
+
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        darkMode = true;
+        darkModeToggle.textContent = '☀️';
+    }
+
+    if (localStorage.getItem('laps')) {
+        laps = JSON.parse(localStorage.getItem('laps'));
+        lapCounter = laps.length + 1;
+        renderLaps();
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        darkMode = !darkMode;
+        localStorage.setItem('darkMode', darkMode);
+        darkModeToggle.textContent = darkMode ? '☀️' : '🌙';
+    });
+
+    if (localStorage.getItem('startTime')) {
+        startTime = parseInt(localStorage.getItem('startTime'));
+        difference = new Date().getTime() - startTime;
+        if (localStorage.getItem('running') === 'true') {
+            timerInterval = setInterval(updateTime, 10);
+            running = true;
+            showStopResetLapButtons();
+            startButton.textContent = "Continue";
+        }
+        updateTime();
+    }
+
+    function start() {
+        if (!running) {
+            startTime = new Date().getTime() - (difference || 0);
+            timerInterval = setInterval(updateTime, 10);
+            running = true;
+            localStorage.setItem('startTime', startTime);
+            localStorage.setItem('running', running);
+            showStopResetLapButtons();
+        } else {
+
+            timerInterval = setInterval(updateTime, 10);
+            running = true;
+            localStorage.setItem('startTime', startTime);
+            localStorage.setItem('running', running);
+            showStopResetLapButtons();
+        }
+    }
+
+    function stop() {
+        if (running) {
+            clearInterval(timerInterval);
+            difference = new Date().getTime() - startTime;
+            running = false;
+            localStorage.setItem('running', running);
+            showStartButton();
+            startButton.textContent = "Continue";
+        }
+    }
+
+    function reset() {
+        if (confirm("Are you sure you want to reset the timer and clear all laps?")) {
+            if (confirm("This action cannot be undone. Proceed?")) {
+                clearInterval(timerInterval);
+                running = false;
+                difference = 0;
+                localStorage.removeItem('startTime');
+                localStorage.removeItem('running');
+                localStorage.removeItem('laps');
+                display.innerText = '00:00:00.000';
+                lapsList.innerHTML = '';
+                lapCounter = 1;
+                laps = [];
+                showStartButton();
+                startButton.textContent = "Start";
+            }
+        }
+    }
+
+    function lap() {
+        if (running) {
+            const lapTime = updatedTime;
+            const lapMilliseconds = Math.floor(lapTime % 1000);
+            const lapSeconds = Math.floor((lapTime / 1000) % 60);
+            const lapMinutes = Math.floor((lapTime / (1000 * 60)) % 60);
+            const lapHours = Math.floor((lapTime / (1000 * 60 * 60)) % 24);
+            const lapTimeString = `${String(lapHours).padStart(2, '0')}:${String(lapMinutes).padStart(2, '0')}:${String(lapSeconds).padStart(2, '0')}.${String(lapMilliseconds).padStart(3, '0')}`;
+
+            laps.push({ lapNumber: lapCounter, lapTime: lapTimeString });
+            localStorage.setItem('laps', JSON.stringify(laps));
+
+            renderLaps();
+            lapCounter++;
+        }
+    }
+
+    function renderLaps() {
+        lapsList.innerHTML = '';
+        laps.forEach((lap, index) => {
+            const lapItem = document.createElement('li');
+            lapItem.innerHTML = `Lap ${index + 1}: ${lap.lapTime} <button onclick="deleteLap(${index})">❌</button>`;
+            lapsList.appendChild(lapItem);
+        });
+    }
+
+    function deleteLap(lapIndex) {
+        laps.splice(lapIndex, 1);
+        localStorage.setItem('laps', JSON.stringify(laps));
+        lapCounter = laps.length + 1;
+        renderLaps();
+    }
+
+
+    function updateTime() {
+        updatedTime = new Date().getTime() - startTime;
+        const milliseconds = Math.floor(updatedTime % 1000);
+        const seconds = Math.floor((updatedTime / 1000) % 60);
+        const minutes = Math.floor((updatedTime / (1000 * 60)) % 60);
+        const hours = Math.floor((updatedTime / (1000 * 60 * 60)) % 24);
+
+        display.innerText =
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+    }
+
+    function showStopResetLapButtons() {
+        startButton.style.display = 'none';
+        stopButton.style.display = 'inline-block';
+        resetButton.style.display = 'inline-block';
+        lapButton.style.display = 'inline-block';
+    }
+
+    function showStartButton() {
+        startButton.style.display = 'inline-block';
+        stopButton.style.display = 'none';
+        resetButton.style.display = 'none';
+        lapButton.style.display = 'none';
+    }
+
+
+    window.addEventListener('beforeunload', () => {
+        if (running) {
+            localStorage.setItem('startTime', startTime);
+        }
+    });
+</script>
+</body>
+</html>
