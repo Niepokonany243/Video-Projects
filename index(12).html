@@ -1,0 +1,155 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Card Game</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --card-color: #ffffff;
+            --hover-bg: #333333;
+            --font-family: 'Arial', sans-serif;
+            --transition-speed: 0.3s;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--card-color);
+            font-family: var(--font-family);
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            gap: 10px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: var(--card-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: transparent;
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+        .card.flipped {
+            color: var(--card-color);
+        }
+        .card:hover {
+            background-color: var(--hover-bg);
+        }
+        .game-message {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            border: none;
+            background-color: var(--card-bg);
+            color: var(--card-color);
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color var(--transition-speed);
+        }
+        button:hover {
+            background-color: var(--hover-bg);
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <main aria-labelledby="game-title">
+        <h1 id="game-title">Memory Card Game</h1>
+        <div class="game-container" aria-labelledby="game-status">
+            <div class="card" tabindex="0" role="button" aria-pressed="false"></div>
+            <div class="card" tabindex="0" role="button" aria-pressed="false"></div>
+            <div class="card" tabindex="0" role="button" aria-pressed="false"></div>
+            <div class="card" tabindex="0" role="button" aria-pressed="false"></div>
+            <div class="card" tabindex="0" role="button" aria-pressed="false"></div>
+            <div class="card" tabindex="0" role="button" aria-pressed="false"></div>
+            <div class="card" tabindex="0" role="button" aria-pressed="false"></div>
+            <div class="card" tabindex="0" role="button" aria-pressed="false"></div>
+        </div>
+        <div class="game-message" id="game-status" aria-live="polite"></div>
+        <button id="restart-btn" class="hidden">Restart Game</button>
+    </main>
+    <script>
+        const cards = document.querySelectorAll('.card');
+        const gameStatus = document.getElementById('game-status');
+        const restartBtn = document.getElementById('restart-btn');
+        const cardValues = ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'];
+        let flippedCards = [];
+        let matchedCards = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function setupGame() {
+            shuffle(cardValues);
+            cards.forEach((card, index) => {
+                card.innerText = cardValues[index];
+                card.classList.remove('flipped');
+                card.setAttribute('aria-pressed', 'false');
+                card.onclick = flipCard;
+                card.onkeyup = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        flipCard.call(card);
+                    }
+                }
+            });
+            gameStatus.innerText = 'Find the matching pairs!';
+            restartBtn.classList.add('hidden');
+            matchedCards = 0;
+        }
+
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                this.classList.add('flipped');
+                this.setAttribute('aria-pressed', 'true');
+                flippedCards.push(this);
+                if (flippedCards.length === 2) {
+                    setTimeout(checkMatch, 1000);
+                }
+            }
+        }
+
+        function checkMatch() {
+            if (flippedCards[0].innerText === flippedCards[1].innerText) {
+                matchedCards += 2;
+                if (matchedCards === cards.length) {
+                    gameStatus.innerText = 'Congratulations! You found all pairs!';
+                    restartBtn.classList.remove('hidden');
+                }
+            } else {
+                flippedCards.forEach(card => {
+                    card.classList.remove('flipped');
+                    card.setAttribute('aria-pressed', 'false');
+                });
+            }
+            flippedCards = [];
+        }
+
+        restartBtn.onclick = setupGame;
+        setupGame();
+    </script>
+</body>
+</html>
