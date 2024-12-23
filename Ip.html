@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Address Lookup</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            position: relative;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: calc(100% - 150px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #getIp {
+            width: 120px;
+            margin-left: 10px;
+            display: inline-block;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        #modeToggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .output {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            overflow-x: auto;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .more-info {
+            margin-top: 15px;
+        }
+        body.dark-mode {
+            background-color: #222;
+            color: #f4f4f4;
+        }
+        .container.dark-mode {
+            background-color: #333;
+            color: #f9f9f9;
+        }
+        .output.dark-mode {
+            background-color: #444;
+            color: #e0e0e0;
+        }
+        .output p {
+            margin-bottom: 8px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                max-width: 95%;
+                padding: 15px;
+            }
+            #map {
+                height: 300px;
+            }
+            input[type="text"] {
+                font-size: 16px;
+            }
+            button {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>IP Address Lookup</h2>
+    <button id="modeToggle">☀️</button>
+    <form id="ipLookupForm">
+        <label for="ipAddress">IP Address:</label>
+        <input type="text" id="ipAddress" name="ipAddress" required>
+        <button id="getIp" type="button">Get IP</button><br>
+        <button type="submit">Lookup</button>
+    </form>
+    <div class="output" id="ipLookupOutput"></div>
+    <div id="map"></div>
+    <button id="viewMoreBtn">View More Info</button>
+    <div class="more-info" id="moreInfo" style="display:none;"></div>
+</div>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    const modeToggle = document.getElementById('modeToggle'),
+        body = document.body,
+        container = document.querySelector('.container'),
+        output = document.querySelector('.output'),
+        mapDiv = document.getElementById('map'),
+        viewMoreBtn = document.getElementById('viewMoreBtn'),
+        moreInfoDiv = document.getElementById('moreInfo');
+
+    let map, marker;
+
+    modeToggle.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        container.classList.toggle('dark-mode');
+        output.classList.toggle('dark-mode');
+        modeToggle.textContent = body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    });
+
+    viewMoreBtn.addEventListener('click', () => {
+        moreInfoDiv.style.display = moreInfoDiv.style.display === 'none' ? 'block' : 'none';
+        viewMoreBtn.textContent = viewMoreBtn.textContent === 'View More Info' ? 'Hide More Info' : 'View More Info';
+    });
+
+    document.getElementById('ipLookupForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const ipAddress = document.getElementById('ipAddress').value;
+        const apiUrl = `https://ipinfo.io/${ipAddress}/json`;
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                const outputHtml = `
+                        <p><strong>IP Address:</strong> ${data.ip}</p>
+                        <p><strong>City:</strong> ${data.city}</p>
+                        <p><strong>Region:</strong> ${data.region}</p>
+                        <p><strong>Country:</strong> ${data.country} <img src="https://flagcdn.com/16x12/${data.country.toLowerCase()}.png" alt="${data.country} flag"></p>
+                        <p><strong>Postal Code:</strong> ${data.postal}</p>
+                        <p><strong>Timezone:</strong> ${data.timezone}</p>
+                        <p><strong>Latitude:</strong> ${data.loc.split(',')[0]}</p>
+                        <p><strong>Longitude:</strong> ${data.loc.split(',')[1]}</p>
+                        <p><strong>ISP:</strong> ${data.org}</p>
+                        <p><strong>Connection Type:</strong> ${data.connection_type || 'Unknown'}</p>
+                        <p><strong>AS Name:</strong> ${data.asn?.name || 'N/A'}</p>
+                        <p><strong>Threat Type:</strong> ${data.security?.threat_type || 'None'}</p>
+                        <p><strong>User-Agent:</strong> ${navigator.userAgent}</p>
+                        <p><strong>Country Calling Code:</strong> +${data.country_calling_code || 'N/A'}</p>
+                        <p><strong>Currency:</strong> ${data.currency || 'N/A'}</p>
+                    `;
+
+                document.getElementById('ipLookupOutput').innerHTML = outputHtml;
+
+                const [lat, lng] = data.loc.split(',');
+                if (map) map.remove();
+                map = L.map('map').setView([lat, lng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                if (marker) marker.remove();
+                marker = L.marker([lat, lng]).addTo(map);
+
+                const moreInfoContent = `
+                        <p><strong>Network:</strong> ${data.bogon ? "Bogon" : "Public"}</p>
+                        <p><strong>Mobile:</strong> ${data.mobile ? "Yes" : "No"}</p>
+                        <p><strong>Proxy:</strong> ${data.proxy ? "Yes" : "No"}</p>
+                        <p><strong>Hosting:</strong> ${data.hosting ? "Yes" : "No"}</p>
+                        <p><strong>VPN:</strong> ${data.vpn ? "Yes" : "No"}</p>
+                        <p><strong>Tor:</strong> ${data.tor ? "Yes" : "No"}</p>
+                        <p><strong>Residential:</strong> ${data.residential ? "Yes" : "No"}</p>
+                        <p><strong>Metro Code:</strong> ${data.metro || 'N/A'}</p>
+                        <p><strong>Continent Code:</strong> ${data.continent || 'N/A'}</p>
+                        <p><strong>ISP Speed:</strong> ${data.speed || 'Unknown'}</p>
+                    `;
+                moreInfoDiv.innerHTML = moreInfoContent;
+            })
+            .catch(error => {
+                document.getElementById('ipLookupOutput').innerHTML = `<p style="color: red;">${error.message}</p>`;
+                if (map) map.remove();
+                if (marker) marker.remove();
+            });
+    });
+
+    document.getElementById('getIp').addEventListener('click', () => {
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('ipAddress').value = data.ip;
+            })
+            .catch(() => {
+                alert("Failed to fetch current IP");
+            });
+    });
+</script>
+</body>
+</html>
